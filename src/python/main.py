@@ -1,6 +1,7 @@
 import numpy as np
 from SWE_finite_difference_2D import navier_stokes_2D
 import matplotlib.pyplot as plt
+from SWE_finite_volume_2D import finite_volume_2D
 
 
 def read_xyz_and_infer_grid_size(filepath):
@@ -71,6 +72,8 @@ print("\nZ Grid (First 5 rows):")
 print(z_grid[:5, :])
 
 dt = 0.0001
-navier_stokes_2D(x_grid, y_grid, z_grid, dt, 1000)
+rain_mm_h = 1
+dx = x_grid[0, 1] - x_grid[0, 0]
+finite_volume_2D(dt, dx, z_grid, 1000, rain_mm_h)
 
 # You can also access individual coordinates, e.g., coordinates[0] for the first vertex
