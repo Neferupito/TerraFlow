@@ -56,23 +56,49 @@ def read_xyz_and_infer_grid_size(filepath):
     return x_grid, y_grid, z_grid, (n_rows, n_cols)
 
 
+import numpy as np
+from scipy.interpolate import interp2d
+
+
+def increase_sampling_by_factor(grid, factor):
+    """
+    Increase the resolution of a 2D grid by a scaling factor using interpolation.
+
+    Parameters:
+        grid (2D array): Original grid data.
+        factor (float): Scaling factor (e.g., 2.0 to double the resolution, 0.5 to halve it).
+
+    Returns:
+        2D array: Interpolated grid with increased resolution.
+    """
+    # Get the original shape of the grid
+    original_rows, original_cols = grid.shape
+
+    # Compute the new resolution
+    new_rows = int(original_rows * factor)
+    new_cols = int(original_cols * factor)
+
+    # Create the original and new coordinate grids
+    x_old = np.linspace(0, original_cols - 1, original_cols)
+    y_old = np.linspace(0, original_rows - 1, original_rows)
+    x_new = np.linspace(0, original_cols - 1, new_cols)
+    y_new = np.linspace(0, original_rows - 1, new_rows)
+
+    # Perform the interpolation
+    interpolator = interp2d(x_old, y_old, grid, kind="linear")
+    new_grid = interpolator(x_new, y_new)
+
+    return new_grid
+
+
 # Example usage
 xyz_file = "../../../BLENDER/gg.xyz"  # Path to your XYZ file
 x_grid, y_grid, z_grid, grid_size = read_xyz_and_infer_grid_size(xyz_file)
-
-# Print the inferred grid size and first few rows of the grids
-print(f"Inferred Grid Size: {grid_size}")
-print("\nX Grid (First 5 rows):")
-print(x_grid[:5, :])
-
-print("\nY Grid (First 5 rows):")
-print(y_grid[:5, :])
-
-print("\nZ Grid (First 5 rows):")
-print(z_grid[:5, :])
-
-dt = 0.0001
-rain_mm_h = 1
+x_grid = increase_sampling_by_factor(x_grid, 1)
+y_grid = increase_sampling_by_factor(y_grid, 1)
+z_grid = increase_sampling_by_factor(z_grid, 1)
+dt = 0.000001
+rain_mm_h = 0
 dx = x_grid[0, 1] - x_grid[0, 0]
 finite_volume_2D(dt, dx, z_grid, 1000, rain_mm_h)
 
